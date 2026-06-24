@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Pink Card Wallet Browser</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bwip-js@4.1.1/dist/bwip-js-min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .file-upload-zone {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px dashed #b5b5b5;
+            margin-bottom: 25px;
+            cursor: pointer;
+        }
+
+        .file-upload-zone input {
+            display: none;
+        }
+
+        /* Matches ama-digital-pink-card.jpg structure exactly */
+        .pkpass-card {
+            width: 100%;
+            min-height: 540px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            box-sizing: border-box;
+            padding: 24px 20px;
+            position: relative;
+        }
+
+        .pkpass-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 65%;
+        }
+
+        .pkpass-logo-text {
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: -0.4px;
+            margin: 0;
+        }
+
+        /* Company address formatting: 11px, Bold 600, Uppercase Tracked */
+        .pkpass-sub-logo-text {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        /* Container designed for standard crest emblems */
+        .pkpass-crest-container {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .pkpass-crest {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .pink-card-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .policy-section {
+            margin-bottom: 10px;
+        }
+
+        .policy-large-value {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-top: 2px;
+        }
+
+        .split-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .split-col {
+            width: 48%;
+        }
+
+        .split-col.right-align {
+            text-align: right;
+        }
+
+        .field-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        .field-value {
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        /* Lower portion disclaimer caption layout matching the top address block styling rules exactly */
+        .pink-card-legal-footer {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+            margin-top: 24px;
+            padding-right: 25px; /* Room buffer for info icon overlay */
+            border-top: 1px solid rgba(0,0,0,0.06);
+            padding-top: 12px;
+        }
+
+        .pkpass-barcode-container {
+            background: white;
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .barcode-canvas {
+            max-width: 100%;
+        }
+
+        .barcode-alt-text {
+            font-size: 11px;
+            letter-spacing: 1px;
+            font-family: monospace;
+        }
+
+        .info-icon-replica {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 16px;
+            height: 16px;
+            border: 1.5px solid currentColor;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            font-family: serif;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h2>Digital Pink Card Wallet</h2>
+        
+        <div class="file-upload-zone" onclick="document.getElementById('pkpass-input').click()">
+            <p>Click to open or drag your insurance <b>.pkpass</b> file here</p>
+            <input type="file" id="pkpass-input" accept=".pkpass" />
+        </div>
+        
+        <div id="pass-browser-container"></div>
+    </div>
+
+    <script>
+        document.getElementById('pkpass-input').addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                await processPkpass(file);
+            }
+        });
+
+        async function processPkpass(file) {
+            try {
+                const zip = await JSZip.loadAsync(file);
+                const passJsonFile = zip.file("pass.json");
+                if (!passJsonFile) throw new Error("Invalid structure: missing pass.json");
+                
+                const passData = JSON.parse(await passJsonFile.async("text"));
+                
+                const assets = {
+                    crest: await extractImageBlob(zip, "logo.png") || await extractImageBlob(zip, "strip.png")
+                };
+
+                renderPassCard(passData, assets);
+            } catch (err) {
+                console.error(err);
+                alert("Failed to read pass file structure: " + err.message);
+            }
+        }
+
+        async function extractImageBlob(zip, fileName) {
+            let file = zip.file(fileName) || zip.file(fileName.replace(".png", "@2x.png")) || zip.file(fileName.replace(".png", "@3x.png"));
+            if (file) {
+                const blob = await file.async("blob");
+                return URL.createObjectURL(blob);
+            }
+            return null;
+        }
+
+        function renderPassCard(data, assets) {
+            const container = document.getElementById("pass-browser-container");
+            
+            const passTypes = ['generic', 'storeCard', 'coupon', 'eventTicket', 'boardingPass'];
+            const typeKey = passTypes.find(key => data[key] !== undefined) || 'generic';
+            const structure = data[typeKey] || {};
+
+            const bg = data.backgroundColor || "#FFC9CE"; 
+            const fg = data.foregroundColor || "#1c1c1e"; 
+            const labelColor = data.labelColor || "#545456"; 
+
+            const fields = [
+                ...(structure.headerFields || []),
+                ...(structure.primaryFields || []),
+                ...(structure.secondaryFields || []),
+                ...(structure.auxiliaryFields || [])
+            ];
+
+            const findField = (keys) => fields.find(f => keys.some(k => f.key.toLowerCase().includes(k))) || { label: '', value: '—' };
+            
+            const policyNum = findField(['policy', 'number', 'id']);
+            const effDate = findField(['effective', 'start', 'eff']);
+            const vehicle = findField(['vehicle', 'car', 'description']);
+            const vin = findField(['vin', 'serial', 'chassis']);
+
+            let expField = findField(['expiry', 'expires', 'end', 'expiration', 'valid_until', 'termination']);
+            let expValue = expField.value;
+
+            if (expValue === '—' && data.expirationDate) {
+                expValue = data.expirationDate.split('T')[0]; 
+            }
+
+            // Fallback image points directly to the transparent Alberta Coat of Arms
+            const finalCrestUrl = 'albertaCOA.jpg';
+
+            container.innerHTML = `
+                <div class="pkpass-card" style="background-color: ${bg}; color: ${fg};">
+                    
+                    <div class="pkpass-top-row">
+                        <div class="brand-container">
+                            <span class="pkpass-logo-text">${data.logoText || 'Economical Insurance'}</span>
+                            <span class="pkpass-sub-logo-text" style="color: ${labelColor}">
+                                111 Westmount Road South, P.O. Box 2000, Waterloo, ON N2L 2L6
+                            </span>
+                        </div>
+                        <div class="pkpass-crest-container">
+                            <img src="${finalCrestUrl}" class="pkpass-crest" alt="c:\Users\r2psy\Downloads\emblem-coat-of-arms.png" />
+                        </div>
+                    </div>
+
+                    <div class="pink-card-layout">
+                        
+                        <div class="policy-section">
+                            <span class="field-label" style="color: ${labelColor}">${policyNum.label || 'POLICY NUMBER'}</span>
+                            <div class="policy-large-value">${policyNum.value}</div>
+                        </div>
+
+                        <div class="split-row">
+                            <div class="split-col">
+                                <span class="field-label" style="color: ${labelColor}">${effDate.label || 'EFFECTIVE DATE'}</span>
+                                <span class="field-value">${effDate.value}</span>
+                            </div>
+                            <div class="split-col right-align">
+                                <span class="field-label" style="color: ${labelColor}">${expField.label || 'EXPIRY DATE'}</span>
+                                <span class="field-value">${expValue}</span>
+                            </div>
+                        </div>
+
+                        <div class="split-row">
+                            <div class="split-col">
+                                <span class="field-label" style="color: ${labelColor}">${vehicle.label || 'INSURED VEHICLE'}</span>
+                                <span class="field-value">${vehicle.value}</span>
+                            </div>
+                            <div class="split-col right-align">
+                                <span class="field-label" style="color: ${labelColor}">${vin.label || 'SERIAL NO'}</span>
+                                <span class="field-value">${vin.value}</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Lower Portion Legal Inter-Province Disclaimer Caption -->
+                    <div class="pink-card-legal-footer" style="color: ${labelColor}">
+                        Motor Vehicle Liability Insurance Card Canada Inter-Province Applicable Within Canada and United States of America.
+                    </div>
+
+                    <div class="info-icon-replica" style="color: ${fg}">i</div>
+
+                    ${data.barcodes ? `
+                        <div class="pkpass-barcode-container">
+                            <canvas id="barcode-canvas" class="barcode-canvas"></canvas>
+                            <span class="barcode-alt-text" style="color: #1c1c1e">${data.barcodes[0].altText || ''}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            if (data.barcodes && data.barcodes[0]) {
+                renderBarcode(data.barcodes[0]);
+            }
+        }
+
+        function renderBarcode(barcodeData) {
+            let bcType = 'qr';
+            if (barcodeData.format === 'PKBarcodeFormatPDF417') bcType = 'pdf417';
+            if (barcodeData.format === 'PKBarcodeFormatAztec') bcType = 'aztec';
+            if (barcodeData.format === 'PKBarcodeFormatCode128') bcType = 'code128';
+
+            try {
+                bwipjs.toCanvas('barcode-canvas', {
+                    bcid: bcType,
+                    text: barcodeData.message,
+                    scale: 3,
+                    height: bcType === 'qr' || bcType === 'aztec' ? undefined : 15, 
+                    includetext: false
+                });
+            } catch (e) {
+                console.error("Failed to render barcode canvas", e);
+            }
+        }
+    </script>
+</body>
+</html>
