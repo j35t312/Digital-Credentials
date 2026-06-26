@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Pink Card Wallet Browser</title>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bwip-js@4.1.1/dist/bwip-js-min.js"></script>
 
     <style>
         :root {
             --bg-color: #f0f2f5;
-            --card-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            --card-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
         body {
@@ -62,13 +63,18 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+
+        }
+
+        .pkpass-top-mid-row {
             margin-bottom: 24px;
+
         }
 
         .brand-container {
             display: flex;
             flex-direction: column;
-            max-width: 65%;
+            max-width: 75%;
         }
 
         .pkpass-logo-text {
@@ -99,7 +105,7 @@
             justify-content: center;
             padding: 4px;
             box-sizing: border-box;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .pkpass-crest {
@@ -162,8 +168,9 @@
             letter-spacing: 0.5px;
             line-height: 1.4;
             margin-top: 24px;
-            padding-right: 25px; /* Room buffer for info icon overlay */
-            border-top: 1px solid rgba(0,0,0,0.06);
+            padding-right: 25px;
+            /* Room buffer for info icon overlay */
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
             padding-top: 12px;
         }
 
@@ -192,30 +199,114 @@
             position: absolute;
             bottom: 16px;
             right: 16px;
-            width: 16px;
-            height: 16px;
+            width: 22px;
+            height: 22px;
             border: 1.5px solid currentColor;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             font-family: serif;
             opacity: 0.6;
+            cursor: pointer;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            user-select: none;
+        }
+
+        .info-icon-replica:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* Back-of-card list view (revealed by the info icon) */
+        .detail-view {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            position: sticky;
+            top: 0;
+            padding-bottom: 8px;
+        }
+
+        .detail-title {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            margin: 0;
+        }
+
+        .detail-close {
+            border: 1.5px solid currentColor;
+            background: rgba(255, 255, 255, 0.45);
+            color: inherit;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            font-size: 16px;
+            line-height: 1;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .detail-close:hover {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        .detail-row {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-row-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .detail-row-value {
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.4;
+            white-space: pre-line;
         }
     </style>
 </head>
+
 <body>
 
     <div class="app-container">
         <h2>Digital Pink Card Wallet</h2>
-        
+
         <div class="file-upload-zone" onclick="document.getElementById('pkpass-input').click()">
             <p>Click to open or drag your insurance <b>.pkpass</b> file here</p>
             <input type="file" id="pkpass-input" accept=".pkpass" />
         </div>
-        
+
         <div id="pass-browser-container"></div>
     </div>
 
@@ -232,9 +323,9 @@
                 const zip = await JSZip.loadAsync(file);
                 const passJsonFile = zip.file("pass.json");
                 if (!passJsonFile) throw new Error("Invalid structure: missing pass.json");
-                
+
                 const passData = JSON.parse(await passJsonFile.async("text"));
-                
+
                 const assets = {
                     crest: await extractImageBlob(zip, "logo.png") || await extractImageBlob(zip, "strip.png")
                 };
@@ -257,24 +348,63 @@
 
         function renderPassCard(data, assets) {
             const container = document.getElementById("pass-browser-container");
-            
+
             const passTypes = ['generic', 'storeCard', 'coupon', 'eventTicket', 'boardingPass'];
             const typeKey = passTypes.find(key => data[key] !== undefined) || 'generic';
             const structure = data[typeKey] || {};
 
-            const bg = data.backgroundColor || "#FFC9CE"; 
-            const fg = data.foregroundColor || "#1c1c1e"; 
-            const labelColor = data.labelColor || "#545456"; 
+            const bg = data.backgroundColor || "#FFC9CE";
+            const fg = data.foregroundColor || "#1c1c1e";
+            const labelColor = data.labelColor || "#545456";
 
             const fields = [
                 ...(structure.headerFields || []),
                 ...(structure.primaryFields || []),
                 ...(structure.secondaryFields || []),
-                ...(structure.auxiliaryFields || [])
+                ...(structure.auxiliaryFields || []),
+                ...(structure.backFields || []),
             ];
 
+            const getRawValue = (key) => {
+                const f = fields.find(f => f.key === key);
+                return f ? f.value : '';
+            };
+
+            // Full raw values (used by the back-of-card list view)
+            const insuranceFull = getRawValue('insuranceCompany');
+            const brokerFull = getRawValue('brokerageCompany');
+            const customerFull = getRawValue('customerInfo');
+
+            // Insurer Address
+            let address;
+            for (let i = 0; i < fields.length; i++) {
+                if (fields[i]['key'] == 'insuranceCompany') {
+                    address = fields[i]['value'].split('\n').slice(1, 4).join()
+                }
+            }
+
+            // Broker Info
+            let broker;
+            for (let i = 0; i < fields.length; i++) {
+                if (fields[i]['key'] == 'brokerageCompany') {
+                    broker = fields[i]['value'].split('\n').slice(0).join()
+                }
+            }
+            broker = `Agent: ${broker}`
+            broker = broker.slice(0, broker.trim().length - 1)
+
+            // Customer Info
+            let customer;
+            for (let i = 0; i < fields.length; i++) {
+                if (fields[i]['key'] == 'customerInfo') {
+                    customer = fields[i]['value']
+                }
+            }
+
+
+
             const findField = (keys) => fields.find(f => keys.some(k => f.key.toLowerCase().includes(k))) || { label: '', value: '—' };
-            
+
             const policyNum = findField(['policy', 'number', 'id']);
             const effDate = findField(['effective', 'start', 'eff']);
             const vehicle = findField(['vehicle', 'car', 'description']);
@@ -284,25 +414,87 @@
             let expValue = expField.value;
 
             if (expValue === '—' && data.expirationDate) {
-                expValue = data.expirationDate.split('T')[0]; 
+                expValue = data.expirationDate.split('T')[0];
             }
 
             // Fallback image points directly to the transparent Alberta Coat of Arms
             const finalCrestUrl = 'albertaCOA.jpg';
+
+            // ---- Build the back-of-card list view rows ----
+            const escapeHtml = (v) => String(v ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            const makeRow = (label, value) => {
+                const v = (value === undefined || value === null || value === '' || value === '—')
+                    ? '—' : value;
+                return `
+                    <div class="detail-row">
+                        <div class="detail-row-label" style="color: ${labelColor}">${escapeHtml(label)}</div>
+                        <div class="detail-row-value">${escapeHtml(v)}</div>
+                    </div>`;
+            };
+
+            // Prefer a dedicated "Vehicle Information" back field if present (it holds the
+            // complete, correct value), otherwise fall back to the assembled vehicle/serial.
+            const vehicleBackField = (structure.backFields || []).find(f =>
+                (f.label || '').toLowerCase().includes('vehicle'));
+            const vehicleInfo = vehicleBackField
+                ? vehicleBackField.value
+                : [vehicle.value, vin.value !== '—' ? `Serial No: ${vin.value}` : '']
+                    .filter(v => v && v !== '—').join('\n');
+
+            // Prefer a dedicated "Policy Information" back field if present (it holds the
+            // complete, correct value), otherwise fall back to the assembled policy details.
+            const policyBackField = (structure.backFields || []).find(f =>
+                (f.label || '').toLowerCase().includes('policy'));
+            const policyInfo = policyBackField
+                ? policyBackField.value
+                : [
+                    policyNum.value !== '—' ? `Policy No: ${policyNum.value}` : '',
+                    effDate.value !== '—' ? `Effective: ${effDate.value}` : '',
+                    expValue !== '—' ? `Expiry: ${expValue}` : ''
+                ].filter(Boolean).join('\n');
+
+            // Surface any extra back fields not already covered above
+            const knownKeys = new Set(['insuranceCompany', 'brokerageCompany', 'customerInfo',
+                policyNum.key, effDate.key, vehicle.key, vin.key, expField.key,
+                vehicleBackField && vehicleBackField.key,
+                policyBackField && policyBackField.key].filter(Boolean));
+            const extraBackFields = (structure.backFields || [])
+                .filter(f => !knownKeys.has(f.key));
+
+            const detailRowsHtml = [
+                makeRow('Name and Address of Insured', customerFull || customer),
+                makeRow('Vehicle Information', vehicleInfo),
+                makeRow('Policy Information', policyInfo),
+                makeRow('Insurance Company', insuranceFull),
+                makeRow('Brokerage', brokerFull),
+                ...extraBackFields.map(f => makeRow(f.label || f.key || 'Info', f.value))
+            ].join('');
 
             container.innerHTML = `
                 <div class="pkpass-card" style="background-color: ${bg}; color: ${fg};">
                     
                     <div class="pkpass-top-row">
                         <div class="brand-container">
-                            <span class="pkpass-logo-text">${data.logoText || 'Economical Insurance'}</span>
+                            <span class="pkpass-logo-text">${data.logoText}</span>
                             <span class="pkpass-sub-logo-text" style="color: ${labelColor}">
-                                111 Westmount Road South, P.O. Box 2000, Waterloo, ON N2L 2L6
+                                ${address}
                             </span>
+                            
                         </div>
+                       
                         <div class="pkpass-crest-container">
                             <img src="${finalCrestUrl}" class="pkpass-crest" alt="albertaCOA.jpg" />
                         </div>
+                    </div>
+
+                    <div class="pkpass-top-mid-row">
+                        <span class="pkpass-sub-logo-text" style="color: ${labelColor}">
+                                ${broker}
+                            </span>
                     </div>
 
                     <div class="pink-card-layout">
@@ -334,6 +526,11 @@
                             </div>
                         </div>
 
+                        <div>
+                            <div class="field-label" style="color: ${labelColor}">NAME OF INSURED</div>
+                            <div class="field-value">${customer}</div>
+                        </div>
+
                     </div>
 
                     <!-- Lower Portion Legal Inter-Province Disclaimer Caption -->
@@ -341,7 +538,7 @@
                         Motor Vehicle Liability Insurance Card Canada Inter-Province Applicable Within Canada and United States of America.
                     </div>
 
-                    <div class="info-icon-replica" style="color: ${fg}">i</div>
+                    <div class="info-icon-replica" id="info-icon" style="color: ${fg}" role="button" tabindex="0" aria-label="View insurance details" title="View details">i</div>
 
                     ${data.barcodes ? `
                         <div class="pkpass-barcode-container">
@@ -349,11 +546,41 @@
                             <span class="barcode-alt-text" style="color: #1c1c1e">${data.barcodes[0].altText || ''}</span>
                         </div>
                     ` : ''}
+
+                    <div class="detail-view" id="detail-view" style="background-color: ${bg}; color: ${fg}; display: none;">
+                        <div class="detail-header" style="background-color: ${bg};">
+                            <h3 class="detail-title">${escapeHtml(data.logoText || 'Insurance Details')}</h3>
+                            <button class="detail-close" id="detail-close" aria-label="Close details">&times;</button>
+                        </div>
+                        ${detailRowsHtml}
+                    </div>
                 </div>
             `;
 
             if (data.barcodes && data.barcodes[0]) {
                 renderBarcode(data.barcodes[0]);
+            }
+
+            // Wire up the info icon to reveal the back-of-card list view
+            const infoIcon = document.getElementById('info-icon');
+            const detailView = document.getElementById('detail-view');
+            const detailClose = document.getElementById('detail-close');
+
+            const openDetails = () => {
+                detailView.style.display = 'flex';
+                detailView.scrollTop = 0;
+            };
+            const closeDetails = () => { detailView.style.display = 'none'; };
+
+            if (infoIcon && detailView) {
+                infoIcon.addEventListener('click', openDetails);
+                infoIcon.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openDetails();
+                    }
+                });
+                detailClose.addEventListener('click', closeDetails);
             }
         }
 
@@ -368,7 +595,7 @@
                     bcid: bcType,
                     text: barcodeData.message,
                     scale: 3,
-                    height: bcType === 'qr' || bcType === 'aztec' ? undefined : 15, 
+                    height: bcType === 'qr' || bcType === 'aztec' ? undefined : 15,
                     includetext: false
                 });
             } catch (e) {
@@ -377,4 +604,5 @@
         }
     </script>
 </body>
+
 </html>
