@@ -1,0 +1,12 @@
+.uploadZone {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px dashed #b5b5b5;
+  margin-bottom: 25px;
+  cursor: pointer;
+}
+
+.uploadZone input {
+  display: none;
+}

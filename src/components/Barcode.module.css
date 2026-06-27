@@ -1,0 +1,20 @@
+.barcodeContainer {
+  background: white;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.barcodeCanvas {
+  max-width: 100%;
+}
+
+.barcodeAltText {
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-family: monospace;
+}

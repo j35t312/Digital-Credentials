@@ -1,0 +1,73 @@
+.detailView {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  position: sticky;
+  top: 0;
+  padding-bottom: 8px;
+}
+
+.detailTitle {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.detailClose {
+  border: 1.5px solid currentColor;
+  background: rgba(255, 255, 255, 0.45);
+  color: inherit;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.detailClose:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.detailRow {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailRowLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.detailRowValue {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: pre-line;
+}

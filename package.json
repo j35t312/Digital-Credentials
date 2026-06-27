@@ -1,19 +1,29 @@
 {
-  "name": "wallet",
+  "name": "digital-credentials-wallet",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "React + TypeScript PWA for browsing .pkpass digital credentials",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "lite-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "dependencies": {
+    "bwip-js": "^4.7.0",
+    "jszip": "^3.10.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
   "devDependencies": {
-    "lite-server": "^2.6.1",
-    "live-server": "^1.2.2",
-    "vite": "^8.1.0"
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "typescript": "^5.9.0",
+    "vite": "^8.1.0",
+    "vite-plugin-pwa": "^1.0.0"
   }
 }

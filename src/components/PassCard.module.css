@@ -1,0 +1,128 @@
+.pkpassCard {
+  width: 100%;
+  min-height: 540px;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  box-sizing: border-box;
+  padding: 24px 20px;
+  position: relative;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.topMidRow {
+  margin-bottom: 24px;
+}
+
+.brandContainer {
+  display: flex;
+  flex-direction: column;
+  max-width: 75%;
+}
+
+.logoText {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+
+.subLogoText {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.pinkCardLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-grow: 1;
+}
+
+.policySection {
+  margin-bottom: 10px;
+}
+
+.policyLargeValue {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-top: 2px;
+}
+
+.splitRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.splitCol {
+  width: 48%;
+}
+
+.rightAlign {
+  text-align: right;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  display: block;
+}
+
+.fieldValue {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.legalFooter {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  margin-top: 24px;
+  padding-right: 25px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 12px;
+}
+
+.infoIcon {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: serif;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  user-select: none;
+}
+
+.infoIcon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
