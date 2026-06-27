@@ -327,6 +327,7 @@
                 const passData = JSON.parse(await passJsonFile.async("text"));
 
                 const assets = {
+                    thumbnail: await extractImageBlob(zip, "thumbnail.png"),
                     crest: await extractImageBlob(zip, "logo.png") || await extractImageBlob(zip, "strip.png")
                 };
 
@@ -417,8 +418,17 @@
                 expValue = data.expirationDate.split('T')[0];
             }
 
-            // Fallback image points directly to the transparent Alberta Coat of Arms
-            const finalCrestUrl = 'albertaCOA.jpg';
+            // Use the thumbnail.png extracted from the .pkpass file. If the pass has no
+            // thumbnail, fall back to an inline SVG placeholder.
+            const placeholderCrest = "data:image/svg+xml;utf8," + encodeURIComponent(
+                `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70" role="img" aria-label="No image">
+                    <rect width="70" height="70" fill="#e0e0e0"/>
+                    <path d="M14 50l13-16 9 11 6-7 14 12z" fill="#b0b0b0"/>
+                    <circle cx="24" cy="22" r="7" fill="#b0b0b0"/>
+                </svg>`
+            );
+            const finalCrestUrl = assets.thumbnail || placeholderCrest;
+            const crestAlt = assets.thumbnail ? 'Pass thumbnail' : 'No image available';
             
             // ---- Build the back-of-card list view rows ----
             const escapeHtml = (v) => String(v ?? '')
@@ -487,7 +497,7 @@
                         </div>
                        
                         <div class="pkpass-crest-container">
-                            <img src="${finalCrestUrl}" class="pkpass-crest" alt="albertaCOA.jpg" />
+                            <img src="${finalCrestUrl}" class="pkpass-crest" alt="${crestAlt}" />
                         </div>
                     </div>
 
