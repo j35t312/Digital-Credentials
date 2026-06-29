@@ -61,3 +61,11 @@ Run the following npm commands for development, building, and previewing:
 ## 📄 License
 
 This project is licensed under the **ISC License**. See the `package.json` file for details.
+
+---
+
+🧑‍💻 Author & Maintenance
+Author: Roel Rivera
+GitHub Repository: Digital-Credentials
+Contact Email: r2psycho@gmail.com
+Copyright: Copyright © 2023-2026 by j35t312
