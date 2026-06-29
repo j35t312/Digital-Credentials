@@ -66,6 +66,6 @@ This project is licensed under the **ISC License**. See the `package.json` file 
 
 🧑‍💻 Author & Maintenance
 Author: Roel Rivera
-GitHub Repository: n-Cycle_Weeks
+GitHub Repository: Digital-Credentials
 Contact Email: r2psycho@gmail.com
 Copyright: Copyright © 2023-2026 by j35t312
